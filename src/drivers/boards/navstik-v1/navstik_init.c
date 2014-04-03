@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ *   Copyright (C) 2013 Navstik Development Team. Based on PX4 port.
  *   Copyright (c) 2012, 2013 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,9 @@
  ****************************************************************************/
 
 /**
- * @file px4fmu_init.c
+ * @file navstik_init.c
  *
- * PX4FMU-specific early startup code.  This file implements the
+ * NAVSTIK-specific early startup code.  This file implements the
  * nsh_archinitialize() function that is called early by nsh during startup.
  *
  * Code here is run before the rcS script is invoked; it should start required
@@ -139,9 +139,9 @@ __EXPORT void stm32_boardinitialize(void)
  *
  ****************************************************************************/
 
-static struct spi_dev_s *spi1;
+//static struct spi_dev_s *spi1;
 static struct spi_dev_s *spi2;
-static struct spi_dev_s *spi3;
+//static struct spi_dev_s *spi3;
 
 #include <math.h>
 
@@ -161,8 +161,17 @@ __EXPORT int nsh_archinitialize(void)
 {
 	int result;
 
+	stm32_configgpio(GPIO_SENSOR_PWR_EN);
+	stm32_gpiowrite(GPIO_SENSOR_PWR_EN, true);
+	
+	stm32_configgpio(GPIO_GPS_PWR_EN);
+	stm32_gpiowrite(GPIO_GPS_PWR_EN, true);
+	
+	stm32_configgpio(GPIO_TELE_PWR_EN);
+	stm32_gpiowrite(GPIO_TELE_PWR_EN, true);
+
 	/* configure always-on ADC pins */
-	stm32_configgpio(GPIO_ADC1_IN10);
+	stm32_configgpio(GPIO_ADC1_IN1);
 	stm32_configgpio(GPIO_ADC1_IN11);
 	/* IN12 and IN13 further below */
 
@@ -199,71 +208,72 @@ __EXPORT int nsh_archinitialize(void)
 
 	/* Configure SPI-based devices */
 
-	spi1 = up_spiinitialize(1);
+	//spi1 = up_spiinitialize(1);
 
-	if (!spi1) {
-		message("[boot] FAILED to initialize SPI port 1\r\n");
-		up_ledon(LED_AMBER);
-		return -ENODEV;
-	}
+	//if (!spi1) {
+	//	message("[boot] FAILED to initialize SPI port 1\r\n");
+	//	up_ledon(LED_AMBER);
+	//	return -ENODEV;
+	//}
 
 	/* Default SPI1 to 1MHz and de-assert the known chip selects. */
-	SPI_SETFREQUENCY(spi1, 10000000);
-	SPI_SETBITS(spi1, 8);
-	SPI_SETMODE(spi1, SPIDEV_MODE3);
-	SPI_SELECT(spi1, PX4_SPIDEV_GYRO, false);
-	SPI_SELECT(spi1, PX4_SPIDEV_ACCEL, false);
-	SPI_SELECT(spi1, PX4_SPIDEV_MPU, false);
-	up_udelay(20);
+	//SPI_SETFREQUENCY(spi1, 10000000);
+	//SPI_SETBITS(spi1, 8);
+	//SPI_SETMODE(spi1, SPIDEV_MODE3);
+	//SPI_SELECT(spi1, PX4_SPIDEV_GYRO, false);
+	//SPI_SELECT(spi1, PX4_SPIDEV_ACCEL, false);
+	//SPI_SELECT(spi1, PX4_SPIDEV_MPU, false);
+	//up_udelay(20);
 
-	message("[boot] Successfully initialized SPI port 1\r\n");
+	//message("[boot] Successfully initialized SPI port 1\r\n");
 
 	/*
 	 * If SPI2 is enabled in the defconfig, we loose some ADC pins as chip selects.
 	 * Keep the SPI2 init optional and conditionally initialize the ADC pins
 	 */
 
-	#ifdef CONFIG_STM32_SPI2
-		spi2 = up_spiinitialize(2);
+	//#ifdef CONFIG_STM32_SPI2
+	//	spi2 = up_spiinitialize(2);
 		/* Default SPI2 to 1MHz and de-assert the known chip selects. */
-		SPI_SETFREQUENCY(spi2, 10000000);
-		SPI_SETBITS(spi2, 8);
-		SPI_SETMODE(spi2, SPIDEV_MODE3);
-		SPI_SELECT(spi2, PX4_SPIDEV_GYRO, false);
-		SPI_SELECT(spi2, PX4_SPIDEV_ACCEL_MAG, false);
+	//	SPI_SETFREQUENCY(spi2, 10000000);
+	//	SPI_SETBITS(spi2, 8);
+	//	SPI_SETMODE(spi2, SPIDEV_MODE3);
+	//	SPI_SELECT(spi2, PX4_SPIDEV_GYRO, false);
+	//	SPI_SELECT(spi2, PX4_SPIDEV_ACCEL_MAG, false);
 
-		message("[boot] Initialized SPI port2 (ADC IN12/13 blocked)\n");
-	#else
-		spi2 = NULL;
-		message("[boot] Enabling IN12/13 instead of SPI2\n");
-		/* no SPI2, use pins for ADC */
-		stm32_configgpio(GPIO_ADC1_IN12);
-		stm32_configgpio(GPIO_ADC1_IN13);	// jumperable to MPU6000 DRDY on some boards
-	#endif
+	//	message("[boot] Initialized SPI port2 (ADC IN12/13 blocked)\n");
+	//#else
+	//	spi2 = NULL;
+	//	message("[boot] Enabling IN12/13 instead of SPI2\n");
+	//	/* no SPI2, use pins for ADC */
+	//	stm32_configgpio(GPIO_ADC1_IN12);
+	//	stm32_configgpio(GPIO_ADC1_IN13);	// jumperable to MPU6000 DRDY on some boards
+	//#endif
 
 	/* Get the SPI port for the microSD slot */
 
-	message("[boot] Initializing SPI port 3\n");
-	spi3 = up_spiinitialize(3);
+	message("[boot] Initializing SPI port 2\n");
+	spi2 = up_spiinitialize(2);
 
-	if (!spi3) {
-		message("[boot] FAILED to initialize SPI port 3\n");
+	if (!spi2) {
+		message("[boot] FAILED to initialize SPI port 2\n");
 		up_ledon(LED_AMBER);
 		return -ENODEV;
 	}
 
-	message("[boot] Successfully initialized SPI port 3\n");
+	SPI_SELECT(spi2, NAVSTIK_SPIDEV_FLASH, false);
+	message("[boot] Successfully initialized SPI port 2\n");
 
 	/* Now bind the SPI interface to the MMCSD driver */
-	result = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi3);
+	result = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi2);
 
 	if (result != OK) {
-		message("[boot] FAILED to bind SPI port 3 to the MMCSD driver\n");
+		message("[boot] FAILED to bind SPI port 2 to the MMCSD driver\n");
 		up_ledon(LED_AMBER);
 		return -ENODEV;
 	}
 
-	message("[boot] Successfully bound SPI port 3 to the MMCSD driver\n");
+	message("[boot] Successfully bound SPI port 2 to the MMCSD driver\n");
 
 	return OK;
 }

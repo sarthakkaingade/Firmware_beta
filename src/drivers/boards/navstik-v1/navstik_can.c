@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ *   Copyright (C) 2013 Navstik Development Team. Based on PX4 port.
  *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,9 @@
  ****************************************************************************/
 
 /**
- * @file px4fmu_spi.c
+ * @file navstik_can.c
  *
- * Board-specific SPI functions.
+ * Board-specific CAN functions.
  */
 
 /************************************************************************************
@@ -43,112 +43,102 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/can.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "chip.h"
+#include "up_arch.h"
+
 #include "stm32.h"
+#include "stm32_can.h"
 #include "board_config.h"
+
+#ifdef CONFIG_CAN
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+/* Configuration ********************************************************************/
+
+#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
+#  warning "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
+#  undef CONFIG_STM32_CAN2
+#endif
+
+#ifdef CONFIG_STM32_CAN1
+#  define CAN_PORT 1
+#else
+#  define CAN_PORT 2
+#endif
+
+/* Debug ***************************************************************************/
+/* Non-standard debug that may be enabled just for testing CAN */
+
+#ifdef CONFIG_DEBUG_CAN
+#  define candbg    dbg
+#  define canvdbg   vdbg
+#  define canlldbg  lldbg
+#  define canllvdbg llvdbg
+#else
+#  define candbg(x...)
+#  define canvdbg(x...)
+#  define canlldbg(x...)
+#  define canllvdbg(x...)
+#endif
+
+/************************************************************************************
+ * Private Functions
+ ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: can_devinit
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the PX4FMU board.
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/can.
  *
  ************************************************************************************/
 
-__EXPORT void weak_function stm32_spiinitialize(void)
+int can_devinit(void)
 {
-	stm32_configgpio(GPIO_SPI_CS_GYRO);
-	stm32_configgpio(GPIO_SPI_CS_ACCEL);
-	stm32_configgpio(GPIO_SPI_CS_MPU);
-	stm32_configgpio(GPIO_SPI_CS_SDCARD);
+	static bool initialized = false;
+	struct can_dev_s *can;
+	int ret;
 
-	/* De-activate all peripherals,
-	 * required for some peripheral
-	 * state machines
-	 */
-	stm32_gpiowrite(GPIO_SPI_CS_GYRO, 1);
-	stm32_gpiowrite(GPIO_SPI_CS_ACCEL, 1);
-	stm32_gpiowrite(GPIO_SPI_CS_MPU, 1);
-	stm32_gpiowrite(GPIO_SPI_CS_SDCARD, 1);
-}
+	/* Check if we have already initialized */
 
-__EXPORT void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
-{
-	/* SPI select is active low, so write !selected to select the device */
+	if (!initialized) {
+		/* Call stm32_caninitialize() to get an instance of the CAN interface */
 
-	switch (devid) {
-	case PX4_SPIDEV_GYRO:
-		/* Making sure the other peripherals are not selected */
-		stm32_gpiowrite(GPIO_SPI_CS_GYRO, !selected);
-		stm32_gpiowrite(GPIO_SPI_CS_MPU, 1);
-		stm32_gpiowrite(GPIO_SPI_CS_ACCEL, 1);
-		break;
+		can = stm32_caninitialize(CAN_PORT);
 
-	case PX4_SPIDEV_ACCEL:
-		/* Making sure the other peripherals are not selected */
-		stm32_gpiowrite(GPIO_SPI_CS_ACCEL, !selected);
-		stm32_gpiowrite(GPIO_SPI_CS_MPU, 1);
-		stm32_gpiowrite(GPIO_SPI_CS_GYRO, 1);
-		break;
+		if (can == NULL) {
+			candbg("ERROR:  Failed to get CAN interface\n");
+			return -ENODEV;
+		}
 
-	case PX4_SPIDEV_MPU:
-		/* Making sure the other peripherals are not selected */
-		stm32_gpiowrite(GPIO_SPI_CS_ACCEL, 1);
-		stm32_gpiowrite(GPIO_SPI_CS_GYRO, 1);
-		stm32_gpiowrite(GPIO_SPI_CS_MPU, !selected);
-		break;
+		/* Register the CAN driver at "/dev/can0" */
 
-	default:
-		break;
+		ret = can_register("/dev/can0", can);
 
+		if (ret < 0) {
+			candbg("ERROR: can_register failed: %d\n", ret);
+			return ret;
+		}
+
+		/* Now we are initialized */
+
+		initialized = true;
 	}
+
+	return OK;
 }
 
-__EXPORT uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-	return SPI_STATUS_PRESENT;
-}
-
-__EXPORT void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
-{
-	/* SPI select is active low, so write !selected to select the device */
-
-	switch (devid) {
-		break;
-
-	default:
-		break;
-
-	}
-}
-
-__EXPORT uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-	return SPI_STATUS_PRESENT;
-}
-
-
-__EXPORT void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
-{
-	/* there can only be one device on this bus, so always select it */
-	stm32_gpiowrite(GPIO_SPI_CS_SDCARD, !selected);
-}
-
-__EXPORT uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-	/* this is actually bogus, but PX4 has no way to sense the presence of an SD card */
-	return SPI_STATUS_PRESENT;
-}
-
+#endif

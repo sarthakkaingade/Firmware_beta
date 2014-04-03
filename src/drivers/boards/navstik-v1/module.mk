@@ -1,10 +1,10 @@
 #
-# Board-specific startup code for the PX4FMU
+# Board-specific startup code for the NAVSTIK
 #
 
-SRCS		 = px4fmu_can.c \
-		   px4fmu_init.c \
-		   px4fmu_pwm_servo.c \
-		   px4fmu_spi.c \
-		   px4fmu_usb.c \
-		   px4fmu_led.c
+SRCS		 = navstik_can.c \
+		   navstik_init.c \
+		   navstik_pwm_servo.c \
+		   navstik_spi.c \
+		   navstik_usb.c \
+		   navstik_led.c
