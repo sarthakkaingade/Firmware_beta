@@ -1,5 +1,5 @@
 ############################################################################
-# configs/px4fmu-v1/nsh/Make.defs
+# configs/navstik-v1/nsh/Make.defs
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -81,7 +81,7 @@ ifeq ($(WINTOOL),y)
   ARCHXXINCLUDES	 = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT		 = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
 else
-  ifeq ($(PX4_WINTOOL),y)
+  ifeq ($(NAVSTIK_WINTOOL),y)
     # Windows-native toolchains (MSYS)
     DIRLINK		 = $(TOPDIR)/tools/copydir.sh
     DIRUNLINK		 = $(TOPDIR)/tools/unlink.sh
