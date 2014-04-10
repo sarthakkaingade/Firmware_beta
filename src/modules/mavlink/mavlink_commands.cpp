@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (C) 2012-2013 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2014 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,42 +32,42 @@
  ****************************************************************************/
 
 /**
- * @file differential_pressure.h
+ * @file mavlink_commands.cpp
+ * Mavlink commands stream implementation.
  *
- * Definition of differential pressure topic
+ * @author Anton Babushkin <anton.babushkin@me.com>
  */
 
-#ifndef TOPIC_DIFFERENTIAL_PRESSURE_H_
-#define TOPIC_DIFFERENTIAL_PRESSURE_H_
+#include "mavlink_commands.h"
 
-#include "../uORB.h"
-#include <stdint.h>
+MavlinkCommandsStream::MavlinkCommandsStream(Mavlink *mavlink, mavlink_channel_t channel) : _channel(channel)
+{
+	_cmd_sub = mavlink->add_orb_subscription(ORB_ID(vehicle_command));
+	_cmd = (struct vehicle_command_s *)_cmd_sub->get_data();
+}
 
-/**
- * @addtogroup topics
- * @{
- */
+MavlinkCommandsStream::~MavlinkCommandsStream()
+{
+}
 
-/**
- * Differential pressure.
- */
-struct differential_pressure_s {
-	uint64_t	timestamp;			/**< Microseconds since system boot, needed to integrate */
-	uint64_t	error_count;			/**< Number of errors detected by driver */
-	float	differential_pressure_pa;		/**< Differential pressure reading */
-	float	differential_pressure_raw_pa;		/**< Raw differential pressure reading (may be negative) */
-	float	differential_pressure_filtered_pa;	/**< Low pass filtered differential pressure reading */
-	float	max_differential_pressure_pa;		/**< Maximum differential pressure reading */
-	float	voltage;				/**< Voltage from analog airspeed sensors (voltage divider already compensated) */
-	float	temperature;				/**< Temperature provided by sensor, -1000.0f if unknown */
-
-};
-
-/**
- * @}
- */
-
-/* register this as object request broker structure */
-ORB_DECLARE(differential_pressure);
-
-#endif
+void
+MavlinkCommandsStream::update(const hrt_abstime t)
+{
+	if (_cmd_sub->update(t)) {
+		/* only send commands for other systems/components */
+		if (_cmd->target_system != mavlink_system.sysid || _cmd->target_component != mavlink_system.compid) {
+			mavlink_msg_command_long_send(_channel,
+						      _cmd->target_system,
+						      _cmd->target_component,
+						      _cmd->command,
+						      _cmd->confirmation,
+						      _cmd->param1,
+						      _cmd->param2,
+						      _cmd->param3,
+						      _cmd->param4,
+						      _cmd->param5,
+						      _cmd->param6,
+						      _cmd->param7);
+		}
+	}
+}

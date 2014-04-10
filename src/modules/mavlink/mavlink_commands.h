@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (C) 2012-2013 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2014 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,42 +32,34 @@
  ****************************************************************************/
 
 /**
- * @file differential_pressure.h
+ * @file mavlink_commands.h
+ * Mavlink commands stream definition.
  *
- * Definition of differential pressure topic
+ * @author Anton Babushkin <anton.babushkin@me.com>
  */
 
-#ifndef TOPIC_DIFFERENTIAL_PRESSURE_H_
-#define TOPIC_DIFFERENTIAL_PRESSURE_H_
+#ifndef MAVLINK_COMMANDS_H_
+#define MAVLINK_COMMANDS_H_
 
-#include "../uORB.h"
-#include <stdint.h>
+#include <uORB/uORB.h>
+#include <uORB/topics/vehicle_command.h>
 
-/**
- * @addtogroup topics
- * @{
- */
+class Mavlink;
+class MavlinkCommansStream;
 
-/**
- * Differential pressure.
- */
-struct differential_pressure_s {
-	uint64_t	timestamp;			/**< Microseconds since system boot, needed to integrate */
-	uint64_t	error_count;			/**< Number of errors detected by driver */
-	float	differential_pressure_pa;		/**< Differential pressure reading */
-	float	differential_pressure_raw_pa;		/**< Raw differential pressure reading (may be negative) */
-	float	differential_pressure_filtered_pa;	/**< Low pass filtered differential pressure reading */
-	float	max_differential_pressure_pa;		/**< Maximum differential pressure reading */
-	float	voltage;				/**< Voltage from analog airspeed sensors (voltage divider already compensated) */
-	float	temperature;				/**< Temperature provided by sensor, -1000.0f if unknown */
+#include "mavlink_main.h"
 
+class MavlinkCommandsStream
+{
+private:
+	MavlinkOrbSubscription *_cmd_sub;
+	struct vehicle_command_s *_cmd;
+	mavlink_channel_t _channel;
+
+public:
+	MavlinkCommandsStream(Mavlink *mavlink, mavlink_channel_t channel);
+	~MavlinkCommandsStream();
+	void update(const hrt_abstime t);
 };
 
-/**
- * @}
- */
-
-/* register this as object request broker structure */
-ORB_DECLARE(differential_pressure);
-
-#endif
+#endif /* MAVLINK_COMMANDS_H_ */
