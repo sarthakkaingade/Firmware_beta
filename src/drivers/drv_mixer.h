@@ -115,4 +115,4 @@ struct mixer_simple_s {
  * - save/serialise for saving tuned mixers.
  */
 
-#endif /* _DRV_ACCEL_H */
+#endif /* _DRV_MIXER_H */
