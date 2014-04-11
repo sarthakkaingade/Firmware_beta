@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ *   Copyright (C) 2013 Navstik Development Team. Based on PX4 port.
  *   Copyright (c) 2012-2014 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,6 +117,12 @@
 #define ADC_BATTERY_VOLTAGE_CHANNEL	10
 #define ADC_BATTERY_CURRENT_CHANNEL	-1
 #define ADC_AIRSPEED_VOLTAGE_CHANNEL	11
+#endif
+
+#ifdef CONFIG_ARCH_BOARD_NAVSTIK_V1
+ #define ADC_BATTERY_VOLTAGE_CHANNEL	11
+ #define ADC_BATTERY_CURRENT_CHANNEL  	1
+ #define ADC_AIRSPEED_VOLTAGE_CHANNEL	10
 #endif
 
 #ifdef CONFIG_ARCH_BOARD_PX4FMU_V2
@@ -785,8 +791,16 @@ Sensors::accel_init()
 		/* set the driver to poll at 800Hz */
 		ioctl(fd, SENSORIOCSPOLLRATE, 800);
 
+#elif CONFIG_ARCH_BOARD_NAVSTIK_V1
+
+		/* set the accel internal sampling rate up to at least 800Hz */
+		ioctl(fd, ACCELIOCSSAMPLERATE, 800);
+
+		/* set the driver to poll at 800Hz */
+		ioctl(fd, SENSORIOCSPOLLRATE, 800);
+
 #else
-#error Need a board configuration, either CONFIG_ARCH_BOARD_PX4FMU_V1 or CONFIG_ARCH_BOARD_PX4FMU_V2
+#error Need a board configuration, either CONFIG_ARCH_BOARD_PX4FMU_V1 or CONFIG_ARCH_BOARD_PX4FMU_V2 or CONFIG_ARCH_BOARD_NAVSTIK_V1
 
 #endif
 
@@ -818,6 +832,13 @@ Sensors::gyro_init()
 		/* set the driver to poll at 1000Hz */
 		if (ioctl(fd, SENSORIOCSPOLLRATE, 1000) != OK)
 			ioctl(fd, SENSORIOCSPOLLRATE, 800);
+#elif CONFIG_ARCH_BOARD_NAVSTIK_V1
+
+		/* set the gyro internal sampling rate up to at least 800Hz */
+		ioctl(fd, GYROIOCSSAMPLERATE, 800);
+
+		/* set the driver to poll at 800Hz */
+		ioctl(fd, SENSORIOCSPOLLRATE, 800);
 
 #else
 
