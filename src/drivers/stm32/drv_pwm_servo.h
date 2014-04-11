@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ *   Copyright (C) 2013 Navstik Development Team. Based on PX4 port.
  *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 
 /* configuration limits */
 #define PWM_SERVO_MAX_TIMERS	4
-#define PWM_SERVO_MAX_CHANNELS	8
+#define PWM_SERVO_MAX_CHANNELS	6   // NAVSTIK has 6 PWM outputs
 
 /* array of timers dedicated to PWM servo use */
 struct pwm_servo_timer {
