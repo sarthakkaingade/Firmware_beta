@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ *   Copyright (C) 2013 Navstik Development Team. Based on PX4 port.
  *   Copyright (c) 2013, 2014 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -598,7 +598,7 @@ meas_airspeed_usage()
 {
 	warnx("usage: meas_airspeed command [options]");
 	warnx("options:");
-	warnx("\t-b --bus i2cbus (%d)", PX4_I2C_BUS_DEFAULT);
+	warnx("\t-b --bus i2cbus (%d)", NAVSTIK_I2C_BUS_SENSORS);
 	warnx("command:");
 	warnx("\tstart|stop|reset|test|info");
 }
@@ -606,7 +606,7 @@ meas_airspeed_usage()
 int
 meas_airspeed_main(int argc, char *argv[])
 {
-	int i2c_bus = PX4_I2C_BUS_DEFAULT;
+	int i2c_bus = NAVSTIK_I2C_BUS_SENSORS;
 
 	int i;
 
