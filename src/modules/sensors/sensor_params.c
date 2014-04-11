@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ *   Copyright (C) 2013 Navstik Development Team. Based on PX4 port.
  *   Copyright (c) 2012-2014 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -488,17 +488,12 @@ PARAM_DEFINE_INT32(BAT_V_SCALE_IO, 10000);
  * @group Battery Calibration
  */
 PARAM_DEFINE_FLOAT(BAT_V_SCALING, 0.0082f);
-#else
-/**
- * Scaling factor for battery voltage sensor on FMU v1.
- *
- * FMUv1 standalone: 1/(10 / (47+10)) * (3.3 / 4095) = 0.00459340659
- * FMUv1 with PX4IO: 0.00459340659
- * FMUv1 with PX4IOAR: (3.3f * 52.0f / 5.0f / 4095.0f) = 0.00838095238
- *
- * @group Battery Calibration
- */
-PARAM_DEFINE_FLOAT(BAT_V_SCALING, 0.00459340659f);
+#elif CONFIG_ARCH_BOARD_NAVSTIK_V1
+/* default is conversion factor for the PX4IO / PX4IOAR board, the factor for PX4FMU standalone is different */
+/* PX4IOAR: 0.00838095238 */
+/* FMU standalone: 1/(10 / (47+10)) * (3.3 / 4095) = 0.00459340659 */
+/* FMU with PX4IOAR: (3.3f * 52.0f / 5.0f / 4095.0f) */
+PARAM_DEFINE_FLOAT(BAT_V_SCALING, 0.003884357f);
 #endif
 
 /**

@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ *   Copyright (C) 2013 Navstik Development Team. Based on PX4 port.
  *   Copyright (C) 2013 PX4 Development Team. All rights reserved.
  *   Author: Thomas Gubler <thomasgubler@student.ethz.ch>
  *           Julian Oes <joes@student.ethz.ch>
@@ -87,6 +87,8 @@ static hrt_abstime blink_msg_end = 0;	// end time for currently blinking LED mes
 static hrt_abstime tune_end = 0;		// end time of currently played tune, 0 for repeating tunes or silence
 static int tune_current = TONE_STOP_TUNE;		// currently playing tune, can be interrupted after tune_end
 static unsigned int tune_durations[TONE_NUMBER_OF_TUNES];
+static bool print_easy_board_detection= true;
+static bool print_pro_board_detection = true; /**Board Detection Warning**/
 
 int buzzer_init()
 {
@@ -302,9 +304,27 @@ float battery_remaining_estimate_voltage(float voltage, float discharged)
 	}
 
 	counter++;
-
-	/* remaining charge estimate based on voltage */
-	float remaining_voltage = (voltage - bat_n_cells * bat_v_empty) / (bat_n_cells * (bat_v_full - bat_v_empty));
+	if(voltage < 5.5)
+	{		
+		if (print_easy_board_detection)
+		{
+			warnx("\nEasy Board Detected");
+			warnx("\nSetting Battery Health to 0.8");
+			print_easy_board_detection=false;
+		}
+		ret=0.8;
+	}	
+	else
+	{	
+		if(print_pro_board_detection)
+		{
+			warnx("\nPro Board Detected");
+			print_pro_board_detection=false;
+		}
+		/* remaining charge estimate based on voltage */
+		float remaining_voltage = (voltage - bat_n_cells * bat_v_empty) / (bat_n_cells * (bat_v_full - bat_v_empty));
+	}
+	
 
 	if (bat_capacity > 0.0f) {
 		/* if battery capacity is known, use discharged current for estimate, but don't show more than voltage estimate */
