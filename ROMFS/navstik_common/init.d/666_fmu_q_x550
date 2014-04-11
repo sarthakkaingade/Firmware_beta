@@ -1,0 +1,72 @@
+#!nsh
+
+echo "[init] 666_fmu_q_x550: NAVSTIK Quad X550 with PWM outputs"
+
+#
+# Load default params for this platform
+#
+if param compare SYS_AUTOCONFIG 1
+then
+        # Set all params here, then disable autoconfig
+        param set MC_ROLL_P 7.0
+	param set MC_ROLLRATE_P 0.1
+	param set MC_ROLLRATE_I 0.0
+	param set MC_ROLLRATE_D 0.003
+	param set MC_PITCH_P 7.0
+	param set MC_PITCHRATE_P 0.1
+	param set MC_PITCHRATE_I 0.0
+	param set MC_PITCHRATE_D 0.003
+	param set MC_YAW_P 2.8
+	param set MC_YAWRATE_P 0.2
+	param set MC_YAWRATE_I 0.0
+	param set MC_YAWRATE_D 0.0
+	param set MC_YAW_FF 0.5
+
+	param set MPC_THR_MAX 1.0
+	param set MPC_THR_MIN 0.1
+	param set MPC_XY_P 1.0
+	param set MPC_XY_VEL_P 0.1
+	param set MPC_XY_VEL_I 0.02
+	param set MPC_XY_VEL_D 0.01
+	param set MPC_XY_VEL_MAX 5
+	param set MPC_XY_FF 0.5
+	param set MPC_Z_P 1.0
+	param set MPC_Z_VEL_P 0.1
+	param set MPC_Z_VEL_I 0.02
+	param set MPC_Z_VEL_D 0.0
+	param set MPC_Z_VEL_MAX 3
+	param set MPC_Z_FF 0.5
+	param set MPC_TILT_MAX 1.0
+	param set MPC_LAND_SPEED 1.0
+	param set MPC_LAND_TILT 0.3
+        param set SYS_AUTOCONFIG 0
+        param save
+fi
+
+#
+# Force some key parameters to sane values
+# MAV_TYPE 2 = quadrotor
+#
+param set MAV_TYPE 2
+ 
+#
+# Start MAVLink
+#
+mavlink start -d /dev/ttyS2 -b 57600
+usleep 5000
+
+#
+# Start PWM output
+#
+fmu mode_pwm
+#pwm rate -c 1234 -r 400
+
+#
+# Load mixer
+#
+mixer load /dev/pwm_output /etc/mixers/FMU_quad_x.mix
+
+#
+# Start common for all multirotors apps
+#
+sh /etc/init.d/rc.mc_apps
