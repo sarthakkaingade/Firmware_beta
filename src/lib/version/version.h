@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ *   Copyright (C) 2013 Navstik Development Team. Based on PX4 port.
  *   Copyright (c) 2013 PX4 Development Team. All rights reserved.
  *   Author: Anton Babushkin <anton.babushkin@me.com>
  *
@@ -53,6 +53,10 @@
 
 #ifdef CONFIG_ARCH_BOARD_PX4FMU_V1
 #define	HW_ARCH "PX4FMU_V1"
+#endif
+
+#ifdef CONFIG_ARCH_BOARD_NAVSTIK_V1
+#define	HW_ARCH "NAVSTIK_V1"
 #endif
 
 #ifdef CONFIG_ARCH_BOARD_PX4FMU_V2
