@@ -277,6 +277,7 @@ void rgbled_set_pattern(rgbled_pattern_t *pattern)
 float battery_remaining_estimate_voltage(float voltage, float discharged)
 {
 	float ret = 0;
+	static float remaining_voltage;
 	static param_t bat_v_empty_h;
 	static param_t bat_v_full_h;
 	static param_t bat_n_cells_h;
