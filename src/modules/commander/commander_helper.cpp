@@ -313,7 +313,7 @@ float battery_remaining_estimate_voltage(float voltage, float discharged)
 			warnx("\nSetting Battery Health to 0.8");
 			print_easy_board_detection=false;
 		}
-		ret=0.8;
+		remaining_voltage=0.8;
 	}	
 	else
 	{	
@@ -323,7 +323,7 @@ float battery_remaining_estimate_voltage(float voltage, float discharged)
 			print_pro_board_detection=false;
 		}
 		/* remaining charge estimate based on voltage */
-		float remaining_voltage = (voltage - bat_n_cells * bat_v_empty) / (bat_n_cells * (bat_v_full - bat_v_empty));
+		remaining_voltage = (voltage - bat_n_cells * bat_v_empty) / (bat_n_cells * (bat_v_full - bat_v_empty));
 	}
 	
 
