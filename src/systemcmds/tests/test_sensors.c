@@ -160,7 +160,7 @@ accel1(int argc, char *argv[])
 	struct accel_report buf;
 	int		ret;
 
-	fd = open("/dev/accel1", O_RDONLY);
+	fd = open("/dev/accel", O_RDONLY);
 
 	if (fd < 0) {
 		printf("\tACCEL1: open fail, run <mpu6000 start> or <lsm303d start> first.\n");
@@ -242,7 +242,7 @@ gyro1(int argc, char *argv[])
 	struct gyro_report buf;
 	int		ret;
 
-	fd = open("/dev/gyro1", O_RDONLY);
+	fd = open("/dev/gyro", O_RDONLY);
 
 	if (fd < 0) {
 		printf("\tGYRO1: open fail, run <l3gd20 start> or <mpu6000 start> first.\n");
