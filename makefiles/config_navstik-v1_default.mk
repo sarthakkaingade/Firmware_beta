@@ -5,7 +5,7 @@
 #
 # Use the configuration's ROMFS.
 #
-ROMFS_ROOT	 = $(NAVSTIK_BASE)/ROMFS/px4fmu_common
+ROMFS_ROOT	 = $(NAVSTIK_BASE)/ROMFS/navstik_common
 ROMFS_OPTIONAL_FILES = $(NAVSTIK_BASE)/Images/navstik-v1_default.bin
 
 #
