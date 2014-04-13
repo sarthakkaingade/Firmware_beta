@@ -23,6 +23,7 @@ MODULES		+= drivers/boards/navstik-v1
 #MODULES		+= drivers/l3gd20
 MODULES		+= drivers/mpu6050
 MODULES		+= drivers/hmc5883
+MODULES		+= drivers/bmp180
 #MODULES		+= drivers/ms5611
 #MODULES		+= drivers/mb12xx
 MODULES		+= drivers/gps
