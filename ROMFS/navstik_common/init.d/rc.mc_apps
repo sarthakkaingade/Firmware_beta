@@ -42,7 +42,8 @@ mc_att_control start
 # Start position control
 #
 mc_pos_control start
-
+usleep 5000000
+mavlink start -d /dev/ttyACM0 &
 usleep 5000
 
 pwm_input

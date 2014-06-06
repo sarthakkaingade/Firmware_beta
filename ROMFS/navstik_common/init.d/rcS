@@ -7,7 +7,7 @@
 # can change this to prevent automatic startup of the flight script.
 #
 set MODE autostart
-
+sercon
 #
 # Try to mount the microSD card.
 #
